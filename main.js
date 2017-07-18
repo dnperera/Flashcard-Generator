@@ -1,14 +1,22 @@
 //Load JSON file with questions
 var questions = require('./basicquestions.json');
 
+//requiring our Basic Card module exported from BasicCard.js
+var BasicCard = require("./BasicCard.js");
+
 // Load the NPM Package inquirer
 var inquirer = require("inquirer");
 
-
+// Core node package for reading and writing files
+var fs = require("fs");
 // variable we will use to count how many times our questions have been asked
 var count = 0;
 var noOfCorrect = 0;
 var noOfWrong =0;
+
+
+//Strart the Game
+startGame();
 
 function askQuestions(){
 	
@@ -18,19 +26,19 @@ function askQuestions(){
 			// Here we create a basic text prompt.
 			{
 			    type: "input",
-			    message: questions[count]['question'],
+			    message: questions[count]['front'],
 			    name: "userReply"
 			}
 		]).then(function(response) {
 				//check whether user reply is the correct answer
-			    if(response.userReply.trim()=== questions[count]['answer'])
+			    if(response.userReply.trim().toLowerCase()=== questions[count]['back'])
 			    {
 			    	console.log("Your answer is correct!.\n");
 			    	noOfCorrect++;
 			    }
 			    else{
 			    	console.log("Your answer is worng!.\n");
-			    	console.log("Correct Answer is ==> "+questions[count]['answer']+"\n");
+			    	console.log("Correct Answer is ==> "+questions[count]['back']+"\n");
 			    	noOfWrong++;
 			    }
 			// add one to count to increment our recursive loop by one
@@ -50,51 +58,96 @@ function askQuestions(){
  
 }
 
-//Strart the Game
-askQuestions();
+
+function addFlashCard(){
+	 console.log("\n----------- New Flash Card! --------------\n");
+	// Created a series of questions
+	inquirer.prompt([
 
 
+		{
+	    	type: "input",
+	    	name: "question",
+	    	message: "Please enter your question\n"
+		},
+		{
+	    	type: "input",
+	    	name: "answer",
+	    	message: "Please enter related answer\n"
+	  	}
+	]).then(function(newQues) {
 
-// var quesStr = {question:"What is the capital of California?",
-//   answer:"Sacramento"};
+		//call basic card function constructor
+		var newCard = new BasicCard(newQues.question,newQues.answer.trim().toLowerCase());
+		
+		console.log(newCard);
+		console.log("");
+		saveFlashCard(newCard);
 
-//   fs.readFile('basicquestions.json', function (err, data) {
-//         //console.log(data);
-//       if(err){
-//       	console.log(err);
-//       }
+	});
+}
+  
+//Following function will update the JSON file with new flash card.
+function saveFlashCard(newCard){
 
-//       var json = JSON.parse(data);
-//       	console.log(json);
+	//Read the Questions from JSON File
+	fs.readFile('basicquestions.json', function (err, data) {
+	      //console.log(data);
+	    if(err){
+	    	console.log(err);
+	    }
 
-//       json.push(quesStr);
-
-//       //fs.writeFile("basicquestions.json", JSON.stringify(json),function(err)
-
-//       fs.writeFile("basicquestions.json",quesStr, function(err) {
-
-//         // If the code experiences any errors it will log the error to the console.
-//         if (err) {
-//           return console.log(err);
-//         }
-
-//         // Otherwise, it will print: "movies.txt was updated!"
-//         console.log("JSON file was updated!");
-
-//       });
-//   });
+	    //convert questions string to an object
+	    var questionObject = JSON.parse(data);
+	    
+	    //add new question to main object
+	    questionObject.push(newCard);
 
 
-// fs.appendFile('./basicquestions.json', quesStr, function(err) {
+	    fs.writeFile("basicquestions.json",JSON.stringify(questionObject), function(err) {
 
-//   // If an error was experienced we say it.
-//   if (err) {
-//     console.log(err);
-//   }
+	      // If the code experiences any errors it will log the error to the console.
+	      if (err) {
+	        return console.log(err);
+	      }
 
-//   // If no error is experienced, we'll log the phrase "Content Added" to our node console.
-//   else {
-//     console.log("Content Added!");
-//   }
+	      // Otherwise, it will print: "movies.txt was updated!"
+	      console.log("New Question was added to the file.\n");
+	      process.exit();
+	    });
+	});
+}
 
-// });
+function startGame(){
+	inquirer.prompt([
+	    // Here we create a basic text prompt.
+	    {
+	      type: "input",
+	      name: "type",
+	      message: "Please Enter What you like to do bellow !\n"+
+	      "Create - To create a new flash card\n"+
+	      "Play - To play the game\n"
+	    }
+	]).then(function(resp) {
+
+		//console.log(resp.type);
+
+		var userPref = resp.type.trim().toLowerCase();
+
+		if(userPref === "create" || userPref === "play"){
+			
+			if(userPref === "create") {
+				addFlashCard();
+			}
+			else{
+				askQuestions();
+			}
+		}
+		else{
+			console.log('Invalid Option selected.');
+		}
+
+	});
+}
+
+
