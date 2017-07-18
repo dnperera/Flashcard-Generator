@@ -1,0 +1,20 @@
+[
+  {"question":"What is the largest freshwater lake in the world?",
+  "answer":"Lake Superior"},
+
+  {"question":"What is the longest river in the world?",
+  "answer":"The Amazon"},
+
+  {"question":"Who was the 44rd president of the United States?",
+  "answer":"Barack Obama"},
+
+  {"question":"What is the capital of Australia?",
+  "answer":"Canberra"},
+
+  {"question":"What is the only manmade object that is observable from the moon?",
+  "answer":"Great Wall of China"},
+
+ {"question":"Where would you find the Sea of Tranquility?",
+ "answer":"The Moon"}
+
+]
